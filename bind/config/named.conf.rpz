@@ -1,0 +1,84 @@
+acl "trusted" {
+    172.16.0.0/12;
+    192.168.0.0/16;
+    10.0.0.0/8;
+    localhost;
+};
+
+options {
+    directory "/var/cache/bind";
+    listen-on port 53 { any; };
+    listen-on-v6 port 53 { any; };
+    allow-query { trusted; };
+    recursion yes;
+    allow-recursion { trusted; };
+    
+    dnssec-validation auto;
+    
+    version "DNS RPZ Manager - Powered by BIND9";
+    
+    // Forwarders for non-RPZ queries
+    forwarders {
+        8.8.8.8;
+        8.8.4.4;
+    };
+    forward only;
+    
+    // RPZ Configuration - Block malicious domains
+    response-policy { zone "rpz" policy recursive-cname; };
+    
+    // Rate limiting
+    rate-limit {
+        responses-per-second 10;
+        window 5;
+        slip 1;
+    };
+};
+
+logging {
+    channel default_log {
+        file "/var/log/bind/default.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+        print-severity yes;
+        print-category yes;
+    };
+    
+    channel query_log {
+        file "/var/log/bind/query.log" versions 5 size 10m;
+        severity info;
+        print-time yes;
+    };
+    
+    channel security_log {
+        file "/var/log/bind/security.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+        print-severity yes;
+    };
+    
+    channel rpz_log {
+        file "/var/log/bind/rpz.log" versions 10 size 20m;
+        severity info;
+        print-time yes;
+        print-severity yes;
+        print-category yes;
+    };
+    
+    category default { default_log; };
+    category cname { default_log; };
+    category rate-limit { default_log; };
+    category queries { query_log; };
+    category security { security_log; };
+    category rpz { rpz_log; };
+};
+
+// RPZ Zone definition
+zone "rpz" {
+    type master;
+    file "/var/cache/bind/rpz/rpz.zone.db";
+    allow-query { any; };
+    allow-transfer { none; };
+    allow-update { none; };
+    check-names warn;
+};
