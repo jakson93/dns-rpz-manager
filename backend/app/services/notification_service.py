@@ -89,3 +89,7 @@ class NotificationService:
 
 
 notification_service = NotificationService()
+
+
+async def notify_all(message: str) -> dict:
+    return await NotificationService.notify_all(message)
