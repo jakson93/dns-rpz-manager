@@ -8,7 +8,7 @@ services:
     container_name: dns-rpz-backend
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8100:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
     container_name: dns-rpz-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3100:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -55,7 +55,7 @@ services:
     container_name: dns-rpz-postgres
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -76,7 +76,7 @@ services:
     container_name: dns-rpz-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -93,9 +93,9 @@ services:
     container_name: dns-rpz-bind9
     restart: unless-stopped
     ports:
-      - "53:53/udp"
-      - "53:53/tcp"
-      - "953:953"
+      - "5353:53/udp"
+      - "5353:53/tcp"
+      - "9535:953"
     volumes:
       - ./bind/config/named.conf.rpz:/etc/bind/named.conf.local:ro
       - ./bind/rpz:/var/cache/bind/rpz
@@ -124,7 +124,7 @@ services:
     container_name: dns-rpz-n8n
     restart: unless-stopped
     ports:
-      - "5678:5678"
+      - "5700:5678"
     depends_on:
       postgres:
         condition: service_healthy
@@ -141,7 +141,7 @@ services:
       - N8N_HOST=localhost
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://localhost:5678/
+      - WEBHOOK_URL=http://localhost:5700/
     volumes:
       - n8n_data:/home/node/.n8n
     networks:
