@@ -27,7 +27,7 @@ const styles: Record<ToastType, string> = {
   info: 'border-blue-500/20 bg-blue-500/10 text-blue-400',
 };
 
-export default function Toast({
+export function Toast({
   message,
   type = 'info',
   onClose,
