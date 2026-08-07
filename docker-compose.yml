@@ -12,8 +12,12 @@ services:
     depends_on:
       - postgres
       - redis
-    env_file:
-      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://dnsadmin:SuaSenhaSegura123@postgres:5432/dns_rpz_manager
+      - SECRET_KEY=941017153f84cda1e4bdffeae4fd62aa7286548e59ba920708392b7fb8f46e15
+      - ACCESS_TOKEN_EXPIRE_MINUTES=480
+      - BIND_RPZ_PATH=/var/cache/bind/rpz.zone.db
+      - RPZ_ZONE_NAME=rpz
     volumes:
       - ./bind/rpz:/var/cache/bind/rpz:ro
       - backend_data:/app/data
@@ -42,9 +46,9 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: dnsadmin
+      POSTGRES_PASSWORD: SuaSenhaSegura123
+      POSTGRES_DB: dns_rpz_manager
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -93,8 +97,8 @@ services:
       - DB_POSTGRESDB_HOST=postgres
       - DB_POSTGRESDB_PORT=5432
       - DB_POSTGRESDB_DATABASE=n8n
-      - DB_POSTGRESDB_USER=${POSTGRES_USER}
-      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_USER=dnsadmin
+      - DB_POSTGRESDB_PASSWORD=SuaSenhaSegura123
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=changeme
