@@ -26,7 +26,7 @@ services:
       - dns-rpz-net
 
   backend:
-    image: python:3.11-slim
+    image: ghcr.io/jakson93/dns-rpz-backend:latest
     restart: always
     ports:
       - "8100:8000"
@@ -43,11 +43,9 @@ services:
       - backend_data:/app/data
     networks:
       - dns-rpz-net
-    command: >
-      sh -c "cd /app && pip install -q fastapi uvicorn sqlalchemy asyncpg python-jose[cryptography] passlib[bcrypt] pydantic-settings python-multipart openpyxl pandas httpx && uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
   frontend:
-    image: node:20-alpine
+    image: ghcr.io/jakson93/dns-rpz-frontend:latest
     restart: always
     ports:
       - "3100:3000"
@@ -91,9 +89,7 @@ services:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=changeme
-      - N8N_HOST=localhost
       - N8N_PORT=5678
-      - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://localhost:5700/
     volumes:
       - n8n_data:/home/node/.n8n
