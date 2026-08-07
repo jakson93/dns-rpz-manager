@@ -10,10 +10,8 @@ services:
     ports:
       - "8100:8000"
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - postgres
+      - redis
     env_file:
       - .env
     volumes:
@@ -21,12 +19,6 @@ services:
       - backend_data:/app/data
     networks:
       - dns-rpz-net
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   frontend:
     build:
@@ -37,18 +29,11 @@ services:
     ports:
       - "3100:3000"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8000
     networks:
       - dns-rpz-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   postgres:
     image: postgres:16-alpine
@@ -64,12 +49,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - dns-rpz-net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
   redis:
     image: redis:7-alpine
@@ -81,12 +60,6 @@ services:
       - redis_data:/data
     networks:
       - dns-rpz-net
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
   bind9:
     image: ubuntu/bind9:latest
@@ -106,18 +79,6 @@ services:
     cap_add:
       - NET_BIND_SERVICE
       - SYS_PTRACE
-    healthcheck:
-      test: ["CMD", "rndc", "status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    command: >
-      sh -c "
-        mkdir -p /var/log/bind &&
-        chmod 755 /var/log/bind &&
-        named -g -c /etc/bind/named.conf.local -u bind
-      "
 
   n8n:
     image: docker.n8n.io/n8nio/n8n:latest
@@ -126,8 +87,7 @@ services:
     ports:
       - "5700:5678"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     environment:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
@@ -146,12 +106,6 @@ services:
       - n8n_data:/home/node/.n8n
     networks:
       - dns-rpz-net
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5678/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
 networks:
   dns-rpz-net:
